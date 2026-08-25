@@ -6,9 +6,9 @@ different geometry), recolored differently, or an exact match.
 import os, re, collections
 import palette as P
 
-OURS = os.path.expanduser('~/Code/github/zed-catppuccin-noctis-icons/icons')
-CN_ROOT = os.path.expanduser(
-    '~/.vscode/extensions/alexdauenhauer.catppuccin-noctis-icons-0.3.0/src/icons')
+_HERE = os.path.dirname(os.path.abspath(__file__))
+OURS = os.path.join(os.path.dirname(_HERE), 'icons')
+CN_ROOT = os.path.join(_HERE, 'upstream', 'noctis')
 
 strip = lambda s: re.sub(r'\s+', '', re.sub(
     r'(fill|stroke)="[^"]*"', '', re.sub(r'#[0-9a-fA-F]{6}', '', s)))
