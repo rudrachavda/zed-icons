@@ -37,9 +37,7 @@ version = "0.1.0"
 schema_version = 1
 description = "Symbols file icons in the Catppuccin Mocha palette"
 authors = ["Rudra Chavda"]
-# Placeholder — this repo does not exist yet. Zed only needs it accurate
-# if you publish to the extension registry.
-repository = "https://github.com/rudrachavda/zed-catppuccin-noctis-icons"
+repository = "https://github.com/rudrachavda/zed-icons"
 icon_themes = ["icon_themes/{EXT_ID}-theme.json"]
 ''')
 
