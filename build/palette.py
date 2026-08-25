@@ -207,10 +207,16 @@ DEFAULT_FILE_ICON = './icons/files/document.svg'
 def apply_assoc(theme):
     """Rewrite icon associations in-place. Returns a summary of what changed."""
     changed = {}
-    if theme['file_icons'].get('file', {}).get('path') != DEFAULT_FILE_ICON:
-        changed['<default>'] = (theme['file_icons'].get('file'),
-                                DEFAULT_FILE_ICON)
-        theme['file_icons']['file'] = {'path': DEFAULT_FILE_ICON}
+    # Which key Zed reads for the fallback is not documented: the published
+    # v0.3.0 schema lists no default at all, yet material-icon-theme and
+    # monospace-icon-theme both set `file`. Setting both candidates -- extra
+    # file_icons keys are inert (the theme already carries 21 unreferenced
+    # ones), so the only cost is two spare entries.
+    for key in ('file', 'default'):
+        if theme['file_icons'].get(key, {}).get('path') != DEFAULT_FILE_ICON:
+            changed[f'<{key}>'] = (theme['file_icons'].get(key),
+                                   DEFAULT_FILE_ICON)
+            theme['file_icons'][key] = {'path': DEFAULT_FILE_ICON}
     # A missing entry means "add it", not "skip it" -- .tsbuildinfo is unmapped
     # upstream and still needs setting.
     for suf, icon in SUFFIX_OVERRIDES.items():
