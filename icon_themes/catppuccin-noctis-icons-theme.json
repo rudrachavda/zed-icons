@@ -756,6 +756,9 @@
         },
         "caddy": {
           "path": "./icons/files/caddy.svg"
+        },
+        "file": {
+          "path": "./icons/files/document.svg"
         }
       },
       "directory_icons": {

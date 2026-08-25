@@ -197,9 +197,20 @@ def post_process(text, name):
 STEM_RETARGET = {'docker-pink': 'docker'}
 
 
+# Fallback icon for anything with no suffix or stem rule -- .properties, and
+# plenty else. Upstream Symbols defines none, so Zed falls back to its own
+# built-in glyph. The `file` key is the override: both material-icon-theme and
+# monospace-icon-theme set it and never reference it from a suffix or stem.
+DEFAULT_FILE_ICON = './icons/files/document.svg'
+
+
 def apply_assoc(theme):
     """Rewrite icon associations in-place. Returns a summary of what changed."""
     changed = {}
+    if theme['file_icons'].get('file', {}).get('path') != DEFAULT_FILE_ICON:
+        changed['<default>'] = (theme['file_icons'].get('file'),
+                                DEFAULT_FILE_ICON)
+        theme['file_icons']['file'] = {'path': DEFAULT_FILE_ICON}
     # A missing entry means "add it", not "skip it" -- .tsbuildinfo is unmapped
     # upstream and still needs setting.
     for suf, icon in SUFFIX_OVERRIDES.items():
