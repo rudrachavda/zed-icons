@@ -197,11 +197,41 @@ def post_process(text, name):
 STEM_RETARGET = {'docker-pink': 'docker'}
 
 
-# Fallback icon for anything with no suffix or stem rule -- .properties, and
-# plenty else. Upstream Symbols defines none, so Zed falls back to its own
-# built-in glyph. The `file` key is the override: both material-icon-theme and
-# monospace-icon-theme set it and never reference it from a suffix or stem.
-DEFAULT_FILE_ICON = './icons/files/document.svg'
+# Zed's icon-theme format has NO way to override the fallback icon: every
+# published schema (v0.1.0 through v0.3.0, the newest) defines the same 8
+# properties and none is a default, and setting file_icons.file / .default was
+# tested and ignored. Unmapped files always get Zed's bundled file.svg.
+#
+# So the only lever is mapping extensions explicitly. These fill gaps found by
+# scanning real projects -- they are applied ONLY where no rule already exists,
+# so upstream Symbols mappings are never clobbered.
+SUFFIX_FALLBACKS = {
+    # C/C++ headers and templates
+    **{e: 'cplus' for e in ('hpp', 'hxx', 'h++', 'ipp', 'inl', 'ixx', 'tpp',
+                            'cppm', 'pch', 'hh', 'modulemap')},
+    'm': 'c',                      # Objective-C
+    **{e: 'python' for e in ('pyc', 'pyo', 'pyd')},
+    **{e: 'perl' for e in ('pl', 'pm')},
+    **{e: 'java' for e in ('class', 'jar')},
+    **{e: 'compressed' for e in ('zst', 'xz', 'lz4', 'br', 'tgz')},
+    # build and project config
+    **{e: 'gear' for e in ('xcconfig', 'xcscheme', 'pbxproj', 'xcprivacy',
+                           'xcworkspacedata', 'entitlements', 'am', 'ac',
+                           'm4', 'meson', 'build', 'in', 'rc')},
+    **{e: 'code-gray' for e in ('s', 'asm')},
+}
+# Genuinely generic - the document glyph, same as .txt uses.
+_GENERIC = ('properties', 'map', 'table', 'log', 'old', 'natvis', 'bin', 'dat',
+            'out', 'o', 'a', 'so', 'dylib', 'lib', 'obj', 'd', 'def', 'sym',
+            'manifest', 'spec', 'list', 'cfg', 'conf', 'nfo', 'todo', 'rst',
+            'inc', 'jam', 'probe', 're', 'patch', 'orig', 'bak', 'tmp')
+SUFFIX_FALLBACKS.update({e: 'document' for e in _GENERIC})
+
+# Zed matches suffixes case-sensitively -- upstream Symbols carries .GITIGNORE
+# alongside .gitignore for exactly this reason. `.S` (assembly) is the common
+# real-world case, but cover the whole set rather than special-casing it.
+SUFFIX_FALLBACKS.update({e.upper(): i for e, i in list(SUFFIX_FALLBACKS.items())
+                         if e.upper() != e})
 
 
 def apply_assoc(theme):
@@ -212,11 +242,16 @@ def apply_assoc(theme):
     # monospace-icon-theme both set `file`. Setting both candidates -- extra
     # file_icons keys are inert (the theme already carries 21 unreferenced
     # ones), so the only cost is two spare entries.
-    for key in ('file', 'default'):
-        if theme['file_icons'].get(key, {}).get('path') != DEFAULT_FILE_ICON:
-            changed[f'<{key}>'] = (theme['file_icons'].get(key),
-                                   DEFAULT_FILE_ICON)
-            theme['file_icons'][key] = {'path': DEFAULT_FILE_ICON}
+    # Drop the file/default keys - tested against Zed 1.16.2 and ignored.
+    for dead in ('file', 'default'):
+        theme['file_icons'].pop(dead, None)
+    added = 0
+    for suf, icon in SUFFIX_FALLBACKS.items():
+        if suf not in theme['file_suffixes'] and icon in theme['file_icons']:
+            theme['file_suffixes'][suf] = icon
+            added += 1
+    if added:
+        changed[f'{added} gap suffixes'] = ('(unmapped)', 'filled')
     # A missing entry means "add it", not "skip it" -- .tsbuildinfo is unmapped
     # upstream and still needs setting.
     for suf, icon in SUFFIX_OVERRIDES.items():
