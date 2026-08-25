@@ -172,14 +172,11 @@ ICON_RECOLOR = {
     'ts-types': {'#A6E3A1': '#89B4FA'},
 }
 
-# Corner radius on the document glyph lifted from 1 to 2 units. Control-point
-# offsets are r * 0.55228 (the circle-to-bezier constant); the folded top-right
-# corner is left untouched.
-_DOC_OLD = ('M6 3C5.44772 3 5 3.44772 5 4V20C5 20.5523 5.44772 21 6 21H18C18.5523 '
-            '21 19 20.5523 19 20V8')
-_DOC_NEW = ('M7 3C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 '
-            '21 19 20.1046 19 19V8')
-SHAPE_TWEAKS = {'document': [(_DOC_OLD, _DOC_NEW), ('13 3H6Z', '13 3H7Z')]}
+# Geometry is left exactly as upstream draws it, so every glyph matches
+# Catppuccin Noctis. The document icon briefly carried a 2-unit corner radius
+# here; that was reverted for consistency. The mechanism stays because it is
+# load-bearing for post_process and errors loudly if a target path ever moves.
+SHAPE_TWEAKS = {}
 
 
 def post_process(text, name):
