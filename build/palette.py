@@ -231,9 +231,36 @@ SUFFIX_FALLBACKS.update({e.upper(): i for e, i in list(SUFFIX_FALLBACKS.items())
                          if e.upper() != e})
 
 
+# Upstream Symbols ships 21 associations pointing at icons its theme JSON never
+# declares, so those files silently get Zed's built-in glyph. Two causes:
+#   * git.svg IS in the pack but is never registered as a file_icon, breaking
+#     all 20 git-file associations (.gitignore, .gitattributes, .gitkeep, ...)
+#   * .less points at a `less` icon that exists in no pack, so it is retargeted
+#     to the same glyph as .css
+MISSING_ICON_DECLS = {'git': './icons/files/git.svg'}
+REPOINT = {'less': 'brackets-sky'}
+
+# `Dockerfile` -- the canonical capitalisation -- is absent upstream, which only
+# ships `dockerfile` and `DOCKERFILE`.
+EXTRA_STEMS = {'Dockerfile': 'docker', 'Containerfile': 'docker'}
+
+
 def apply_assoc(theme):
     """Rewrite icon associations in-place. Returns a summary of what changed."""
     changed = {}
+    for name, path in MISSING_ICON_DECLS.items():
+        if name not in theme['file_icons'] and os.path.exists(
+                os.path.join(SY, path.replace('./icons/', ''))):
+            theme['file_icons'][name] = {'path': path}
+            changed[f'declare {name}'] = ('(undeclared)', path)
+    for suf, icon in REPOINT.items():
+        if theme['file_suffixes'].get(suf) != icon:
+            changed[f'.{suf}'] = (theme['file_suffixes'].get(suf), icon)
+            theme['file_suffixes'][suf] = icon
+    for stem, icon in EXTRA_STEMS.items():
+        if theme['file_stems'].get(stem) != icon:
+            changed[stem] = (theme['file_stems'].get(stem), icon)
+            theme['file_stems'][stem] = icon
     # Which key Zed reads for the fallback is not documented: the published
     # v0.3.0 schema lists no default at all, yet material-icon-theme and
     # monospace-icon-theme both set `file`. Setting both candidates -- extra

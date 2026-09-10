@@ -756,6 +756,9 @@
         },
         "caddy": {
           "path": "./icons/files/caddy.svg"
+        },
+        "git": {
+          "path": "./icons/files/git.svg"
         }
       },
       "directory_icons": {
@@ -3411,7 +3414,7 @@
         "pug": "pug",
         "lua": "lua",
         "luau": "luau",
-        "less": "less",
+        "less": "brackets-sky",
         "java": "java",
         "jsp": "java",
         "dart": "dart",
@@ -5303,7 +5306,9 @@
         "caddyfile.prod": "caddy",
         "CADDYFILE.PROD": "caddy",
         "caddyfile.staging": "caddy",
-        "CADDYFILE.STAGING": "caddy"
+        "CADDYFILE.STAGING": "caddy",
+        "Dockerfile": "docker",
+        "Containerfile": "docker"
       }
     }
   ]

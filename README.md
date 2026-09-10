@@ -6,14 +6,27 @@ colors taken from the VS Code
 [Catppuccin Noctis Icons](https://github.com/alexdauenhauer/catppuccin-noctis-icons)
 theme.
 
+<p align="center">
+  <img src="docs/tree.svg" alt="A project tree rendered with the theme" width="624">
+</p>
+
+<p align="center">
+  <img src="docs/grid.svg" alt="A sample of the icon set" width="512">
+</p>
+
+Both images are composited from the shipped icons, with every filename resolved
+through the theme's own association table — so they show exactly what Zed
+renders, and cannot drift from the pack. Regenerate with
+`python3 build/preview.py`.
+
 Both packs derive from the same base artwork, so this keeps Symbols' much larger
 association table and moves only the palette across:
 
 |               | this theme | VS Code Noctis |
 | ------------- | ---------: | -------------: |
-| icons         |        355 |            246 |
-| file suffixes |        427 |            348 |
-| file stems    |       1562 |            587 |
+| icon files    |        355 |            246 |
+| file suffixes |        571 |            348 |
+| file stems    |       1564 |            587 |
 | named folders |        601 |             80 |
 
 ## Install
@@ -58,10 +71,29 @@ Eight icons are adopted from Noctis wholesale, artwork included: `python`,
   fall through to Zed's default icon. Here they use the JSON braces.
 - `ts-types` (`.d.ts`, `.d.cts`, `.d.mts`) is recolored blue to match the
   TypeScript icon instead of standing alone in green.
-- The `document` glyph has a 2-unit corner radius rather than 1.
 - Associations changed to match Noctis: `.css` → sky brackets, `.txt` →
   document, `components.json` → JSON braces, `postcss.config.mjs` → JS, and all
   128 `docker-compose.*` variants → the blue docker icon.
+
+Icon geometry is otherwise left exactly as upstream draws it.
+
+## Upstream bugs fixed
+
+Symbols ships 21 associations pointing at icons its own theme JSON never
+declares, so those files silently fall back to Zed's built-in glyph:
+
+- **`git` was never declared**, despite `git.svg` shipping in the pack. That
+  broke all 20 git-file associations — `.gitignore`, `.gitattributes`,
+  `.gitconfig`, `.gitkeep`, `.gitmodules` and their uppercase variants.
+- **`.less` pointed at a `less` icon** that exists in no pack. Retargeted to the
+  same glyph as `.css`.
+- **`Dockerfile`** — the canonical capitalisation — had no rule at all; upstream
+  only covers `dockerfile` and `DOCKERFILE`. Added, along with `Containerfile`.
+
+Dangling associations: 21 → 0.
+
+Zed also matches suffixes case-sensitively and offers no way to set a fallback
+icon, so unmapped extensions are filled in explicitly — see `SUFFIX_FALLBACKS`.
 
 ## Rebuilding
 
